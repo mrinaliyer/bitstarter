@@ -3,7 +3,7 @@ var express = require('express');
 var app = express.createServer(express.logger());
 
 app.get('/', function(request, response) {
-  response.send('What is going on?');
+  response.send('Added index.html');
 });
 
 var port = process.env.PORT || 5000;
