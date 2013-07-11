@@ -10,7 +10,7 @@ function readIndex(){
 app.get('/', function(request, response) {
 
     var hello = readIndex();
-    response.send('Trying to read in index.html');
+    response.send(hello);
 });
 
 var port = process.env.PORT || 5000;
