@@ -20,15 +20,12 @@ References:
    - https://developer.mozilla.org/en-US/docs/JSON
    - https://developer.mozilla.org/en-US/docs/JSON#JSON_in_Firefox_2
 */
+
 var fs = require('fs');
 var program = require('commander');
 var cheerio = require('cheerio');
-var rest = require('restler');
-var sys = require('sys');
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
-var URL_DEFAULT="https://google.com";
-var URLFILE_DEFAULT="url.html";
 
 var assertFileExists = function(infile) {
     var instr = infile.toString();
@@ -42,25 +39,6 @@ var assertFileExists = function(infile) {
 var cheerioHtmlFile = function(htmlfile) {
     return cheerio.load(fs.readFileSync(htmlfile));
 };
-
-
-var assertURLExists = function(url){
-
-    var inURL = url.toString();
-
-    rest.get(url).on('complete', function(response){
-
-	if (response instanceof Error) {
-            sys.puts('Error: ' + response.message);
-            process.exit(1);
-	}
-	else{fs.writeFileSync(URLFILE_DEFAULT, response);}
-    });
-
-    return inURL;
-
-};
-
 
 var loadChecks = function(checksfile) {
     return JSON.parse(fs.readFileSync(checksfile));
@@ -85,28 +63,12 @@ var clone = function(fn) {
 
 if(require.main == module) {
     program
+        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
-        .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists))
-        .option('-u, --url <url>','URL',clone(assertURLExists))
         .parse(process.argv);
-    if(program.file && program.url){
-	console.log('Provide either a file or a url, not both');
-	process.exit(1);
-    }
-    if(program.file){
-	var checkJson = checkHtmlFile(program.file, program.checks);
-	var outJson = JSON.stringify(checkJson, null, 4);
-	console.log(outJson);
-    }
-    if(program.url){
-	var checkURL=checkHtmlFile(URLFILE_DEFAULT,program.checks);
-	var outJSON2 = JSON.stringify(checkURL, null, 4);
-	console.log(outJSON2);
-    }
-    if(!program.file && !program.url){
-	console.log("Provide atleast a url or a file");
-    }
-
+    var checkJson = checkHtmlFile(program.file, program.checks);
+    var outJson = JSON.stringify(checkJson, null, 4);
+    console.log(outJson);
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
